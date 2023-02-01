@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\ExchangeData;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,6 +40,16 @@ class ExchangeDataRepository extends ServiceEntityRepository
         }
     }
 
+   
+    public function get($id): ?ExchangeData
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.id = p')
+            ->setParameter('p', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 //    /**
 //     * @return ExchangeData[] Returns an array of ExchangeData objects
 //     */
@@ -54,13 +65,16 @@ class ExchangeDataRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?ExchangeData
-//    {
-//        return $this->createQueryBuilder('e')
-//            ->andWhere('e.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function getYearData($year): array
+    {
+        $start_date = new DateTime($year.'-01-01');
+        $end_date = new DateTime($year.'-12-31');
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.date BETWEEN  :start AND :end')
+            ->setParameter('start', $start_date)
+            ->setParameter('end', $end_date)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

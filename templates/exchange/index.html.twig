@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ExchangeController!{% endblock %}
+{% block title %}Hello!{% endblock %}
 
 {% block body %}
 <style>
@@ -9,12 +9,62 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>Hello </h1>
+    <button id="button1"> add Year data</button>
+    <button id="button2"> get Year data</button><br>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'C:/sites/test/exchange_flaviar/src/Controller/ExchangeController.php'|file_link(0) }}">src/Controller/ExchangeController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'C:/sites/test/exchange_flaviar/templates/exchange/index.html.twig'|file_link(0) }}">templates/exchange/index.html.twig</a></code></li>
-    </ul>
+    <input id="date" type="date" value="2017-06-01" />
+    <button id="button3"> get day data</button>
+
+    <div id="response"></div>
 </div>
+<script>
+    $(document).ready(function(){
+        $("#button1").click(function(e){
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: '{{ path('ajax_route', {'action': 'addYearData'}) }}',
+                data: {'data': '2020'},
+                success: function(response){
+                    $("#response").html('<h3>'+response+'</h3>');
+                }
+            });
+        });
+        $("#button2").click(function(e){
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: '{{ path('ajax_route', {'action': 'getYearData'}) }}',
+                data: {'data': '2020'},
+                success: function(response){
+                    console.log(response);
+                    let html = '<table><tr><th>Date</th><th>Value of USD FROM 1 €</th></tr>'
+                    $.each(response , function( index, value ) {
+                        html += '<tr><td>'+ value.date+'<td>'+value.value+'</td></tr>';
+                    });
+                    html += '</table>'
+                    $("#response").html(html);
+                }
+            });
+        });
+        $("#button3").click(function(e){
+            const date = $("#date").val();
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: '{{ path('ajax_route', {'action': 'getDayData'}) }}',
+                data: {'data': date},
+                success: function(response){
+                   let html = '<table><tr><th>Date</th><th>Value of USD FROM 1 €</th></tr>'
+                    
+                    html += '<tr><td>'+ response.date+'<td>'+response.value+'</td></tr>';
+   
+                    html += '</table>';
+                    $("#response").html(html);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
