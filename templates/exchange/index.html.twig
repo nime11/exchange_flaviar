@@ -11,7 +11,8 @@
 <div class="example-wrapper">
     <h1>Hello </h1>
     <button id="button1"> add Year data</button>
-    <button id="button2"> get Year data</button><br>
+    <button id="button2"> get Year data</button><button id="button2-1"> get Year data XLS</button><br>
+
 
     <input id="date" type="date" value="2017-06-01" />
     <button id="button3"> get day data</button>
@@ -39,12 +40,30 @@
                 data: {'data': '2020'},
                 success: function(response){
                     console.log(response);
-                    let html = '<table><tr><th>Date</th><th>Value of USD FROM 1 €</th></tr>'
+                    let html = '<table><tr><th>Date</th><th>Min</th><th>Max</th><th>AVG</th></tr>'
                     $.each(response , function( index, value ) {
-                        html += '<tr><td>'+ value.date+'<td>'+value.value+'</td></tr>';
+                        html += '<tr><td>'+ value.date+'<td>'+value.min+'</td><td>'+value.max+'</td><td>'+value.avg+'</td></tr>';
                     });
                     html += '</table>'
                     $("#response").html(html);
+                }
+            });
+        });
+        $("#button2-1").click(function(e){
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: '{{ path('ajax_route', {'action': 'getYearDataToXsl'}) }}',
+                data: {'data': '2020'},
+                success: function(response){
+                    console.log(response);        
+                    var $a = $("<a>");
+                    $a.attr("href",response.file);
+                    $("body").append($a);
+                    $a.attr("download","flaviar.xlsx");
+                    $a[0].click();
+                    $a.remove();          
+                    $("#response").html('<h3>DOne</h3>');
                 }
             });
         });

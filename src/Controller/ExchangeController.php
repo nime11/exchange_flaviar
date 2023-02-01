@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Utils\Exel;
 use App\Entity\ExchangeData;
 use App\Repository\ExchangeDataRepository;
 use DateTime;
@@ -55,11 +56,33 @@ class ExchangeController extends AbstractController
         } elseif($action === 'getYearData'){            
             $dataR = [];
             $yeardata=  $exDRepository->getYearData('2020');
+            $dataM = [];
+
             if($yeardata){
-                foreach($yeardata as $val){
-                    $dataR[] =  ['date' =>  $val->getDate()->format('Y-m-d'),'value' =>$val->getValueTo()];
+                foreach($yeardata as $val){                    
+                    $dataM[$val->getDate()->format('Y-m')][] = $val->getValueTo();
+                }
+                foreach($dataM as $kM => $val){
+                    $dataR[] =[ 'date' => $kM, 'min' =>  min($val), 'max'=>max($val), 'avg' =>array_sum($val)/count($val)];
                 }
             }           
+        }elseif($action === 'getYearDataToXsl'){            
+            $exel = new Exel();
+            $dataR = '';
+            $yeardata=  $exDRepository->getYearData('2020');
+            $dataM = [];
+
+            if($yeardata){
+                foreach($yeardata as $val){                    
+                    $dataM[$val->getDate()->format('Y-m')][] = $val->getValueTo();
+                }
+                $dataN[] = ['date','min','max','avg'];
+                foreach($dataM as $kM => $val){
+                    $dataN[] =[  $kM,  min($val), max($val), array_sum($val)/count($val)];
+                }
+                $dataR = $exel->createXLS($dataN);
+            }          
+
         } elseif($action === 'getDayData'){
             $dayData = $this->getExchagneDataDay(new DateTime($data));
             $exData = new ExchangeData();
@@ -76,7 +99,7 @@ class ExchangeController extends AbstractController
         } else{
             $dataR=  '';
         }
-
+      
                    // Return a JSON response
         return new JsonResponse($dataR);
     }

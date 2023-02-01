@@ -7,9 +7,9 @@ namespace App\Utils;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 class Exel{
-    function createXLS($data, $biz, $date, $sku, $typeC ){  
+    function createXLS($data){  
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
     
@@ -18,11 +18,22 @@ class Exel{
             $sheet->fromArray([$line], NULL, "A$i"); 
             $i++;
         }
-        $filename=__DIR__ ."/csvupload/$biz-$sku-$date-$typeC.xlsx";
-    
+        $filename='flaviar.xlsx';
+        $sheet->getStyle('B:D')
+        ->getNumberFormat()
+        ->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD_SIMPLE);
+
         $writer = new Xlsx($spreadsheet);
-        $writer->save($filename);
-        return "/csvupload/$biz-$sku-$date-$typeC.xlsx";
+        ob_start();
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'. urlencode($filename).'"');
+        $writer->save('php://output');
+        $xlsData = ob_get_contents();
+        ob_end_clean();
+        return  array(
+            'op' => 'ok',
+            'file' => "data:application/vnd.ms-excel;base64,".base64_encode($xlsData)
+        );
     }
 }
 
